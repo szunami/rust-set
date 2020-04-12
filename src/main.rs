@@ -2,6 +2,7 @@ use crate::Color::{GREEN, RED, PURPLE};
 use crate::Quantity::{ONE, TWO, THREE};
 use crate::Shading::{EMPTY, PARTIAL, FULL};
 use core::fmt;
+use rand::Rng;
 
 #[derive(Debug, Clone)]
 enum Color { RED, GREEN, PURPLE }
@@ -34,12 +35,27 @@ fn main() {
                 let card = Card {
                     color: color.clone(),
                     quantity: quantity.clone(),
-                    shading: shading.clone()
+                    shading: shading.clone(),
                 };
                 pile.push(card);
             }
         }
     }
+    println!("Initial pile:\n\n{:?}", pile);
 
-    println!("{:?}", pile);
+    println!("Shuffled pile:\n\n{:?}", shuffle(&pile))
+}
+
+fn shuffle(pile: &Vec<Card>) -> Vec<Card> {
+    let mut result = pile.clone();
+    for (index, _card) in pile.iter().enumerate() {
+        let low = index;
+        let high = pile.len() - 1;
+        if low == high {
+            break;
+        }
+        let swap_index = rand::thread_rng().gen_range(index, pile.len() - 1);
+        result.swap(index, swap_index);
+    }
+    return result;
 }
