@@ -27,8 +27,13 @@ impl fmt::Debug for Card {
 }
 
 fn main() {
-    let mut pile = Vec::new();
+    let mut pile = initial_deck();
+    println!("Initial pile:\n\n{:?}", pile);
+    println!("Shuffled pile:\n\n{:?}", shuffle(&pile))
+}
 
+fn initial_deck() -> Vec<Card> {
+    let mut pile = Vec::new();
     for color in [RED, GREEN, PURPLE].iter() {
         for quantity in [ONE, TWO, THREE].iter() {
             for shading in [EMPTY, PARTIAL, FULL].iter() {
@@ -41,9 +46,7 @@ fn main() {
             }
         }
     }
-    println!("Initial pile:\n\n{:?}", pile);
-
-    println!("Shuffled pile:\n\n{:?}", shuffle(&pile))
+    return pile;
 }
 
 fn shuffle(pile: &Vec<Card>) -> Vec<Card> {
