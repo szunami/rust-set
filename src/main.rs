@@ -5,16 +5,16 @@ use core::fmt;
 use rand::Rng;
 use std::io;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 enum Color { RED, GREEN, PURPLE }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 enum Quantity { ONE, TWO, THREE }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 enum Shading { EMPTY, PARTIAL, FULL }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 struct Card {
     color: Color,
     quantity: Quantity,
@@ -41,29 +41,35 @@ fn main() {
         println!("Current board state: {:?}", board);
         println!("Enter a potential set, or type deal.");
 
-        let mut raw_user_input = String::new();
+        let (card_0, card_1, card_2) = read_and_parse_input(&board);
 
-        io::stdin()
-            .read_line(&mut raw_user_input)
-            .expect("Failed to read line");
+        println!("You chose {:?}, {:?}, {:?}", card_0, card_1, card_2);
 
-        let potential_set_indices: Vec<&str> = raw_user_input.split(" ").collect::<Vec<&str>>();
-        if potential_set_indices.len() != 3 {
-            println!("Failed to read line");
-        }
-
-        let card_index_0 = parse_card_index(&potential_set_indices, 0) as usize;
-        let card_index_1 = parse_card_index(&potential_set_indices, 1) as usize;
-        let card_index_2 = parse_card_index(&potential_set_indices, 2) as usize;
-
-        let card_0: &Card = board.get(card_index_0).unwrap();
-        let card_1: &Card = board.get(card_index_1).unwrap();
-        let card_2: &Card = board.get(card_index_2).unwrap();
-
-        if (is_set(card_0, card_1, card_2)) {
-            println!("well alright!");
-        }
+        is_set(card_0, card_1, card_2);
     }
+}
+
+fn read_and_parse_input(board: &Vec<Card>) -> (&Card, &Card, &Card) {
+    let mut raw_user_input = String::new();
+
+    io::stdin()
+        .read_line(&mut raw_user_input)
+        .expect("Failed to read line");
+
+    let potential_set_indices: Vec<&str> = raw_user_input.split(" ").collect::<Vec<&str>>();
+    if potential_set_indices.len() != 3 {
+        println!("Failed to read line");
+    }
+
+    let card_index_0 = parse_card_index(&potential_set_indices, 0) as usize;
+    let card_index_1 = parse_card_index(&potential_set_indices, 1) as usize;
+    let card_index_2 = parse_card_index(&potential_set_indices, 2) as usize;
+
+    let card_0: &Card = board.get(card_index_0).unwrap();
+    let card_1: &Card = board.get(card_index_1).unwrap();
+    let card_2: &Card = board.get(card_index_2).unwrap();
+
+    return (card_0, card_1, card_2);
 }
 
 fn parse_card_index(potential_set_indices: &Vec<&str>, input_index: usize) -> i32 {
@@ -76,6 +82,24 @@ fn parse_card_index(potential_set_indices: &Vec<&str>, input_index: usize) -> i3
 
 fn is_set(card_0: &Card, card_1: &Card, card_2: &Card) -> bool {
     println!("Checking if {:?}, {:?}, {:?} is a set...", card_0, card_1, card_2);
+
+    if !((card_0.color == card_1.color && card_0.color == card_2.color) ||
+        (card_0.color != card_1.color && card_0.color != card_2.color)) {
+        println!("Color check failed");
+        return false;
+    }
+
+    if !((card_0.quantity == card_1.quantity && card_0.quantity == card_2.quantity) ||
+        (card_0.quantity != card_1.quantity && card_0.quantity != card_2.quantity)) {
+        println!("Quantity check failed");
+        return false;
+    }
+
+    if !((card_0.shading == card_1.shading && card_0.shading == card_2.shading) ||
+        (card_0.shading != card_1.shading && card_0.shading != card_2.shading)) {
+        println!("Shading check failed");
+        return false;
+    }
 
     return true;
 }
@@ -111,3 +135,70 @@ fn shuffle(pile: &Vec<Card>) -> Vec<Card> {
     return result;
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn is_set_works() {
+        let card_0 = Card {
+            color: RED,
+            quantity: ONE,
+            shading: EMPTY,
+        };
+        let card_1 = Card {
+            color: RED,
+            quantity: ONE,
+            shading: PARTIAL,
+        };
+        let card_2 = Card {
+            color: RED,
+            quantity: ONE,
+            shading: FULL,
+        };
+
+        assert_eq!(is_set(&card_0, &card_1, &card_2), true)
+    }
+
+    #[test]
+    fn is_set_works_2() {
+        let card_0 = Card {
+            color: RED,
+            quantity: ONE,
+            shading: EMPTY,
+        };
+        let card_1 = Card {
+            color: RED,
+            quantity: TWO,
+            shading: PARTIAL,
+        };
+        let card_2 = Card {
+            color: RED,
+            quantity: THREE,
+            shading: FULL,
+        };
+
+        assert_eq!(is_set(&card_0, &card_1, &card_2), true)
+    }
+
+    #[test]
+    fn is_set_works_3() {
+        let card_0 = Card {
+            color: RED,
+            quantity: ONE,
+            shading: EMPTY,
+        };
+        let card_1 = Card {
+            color: GREEN,
+            quantity: TWO,
+            shading: PARTIAL,
+        };
+        let card_2 = Card {
+            color: PURPLE,
+            quantity: THREE,
+            shading: FULL,
+        };
+
+        assert_eq!(is_set(&card_0, &card_1, &card_2), true)
+    }
+}
