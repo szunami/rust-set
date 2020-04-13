@@ -4,6 +4,8 @@ use crate::Shading::{EMPTY, PARTIAL, FULL};
 use core::fmt;
 use rand::Rng;
 use std::io;
+use colored::*;
+use crate::Shape::{DIAMOND, SQUIGGLE, CIRCLE};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 enum Color { RED, GREEN, PURPLE }
@@ -14,11 +16,22 @@ enum Quantity { ONE, TWO, THREE }
 #[derive(Debug, Clone, PartialEq, Eq)]
 enum Shading { EMPTY, PARTIAL, FULL }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum Shape { SQUIGGLE, CIRCLE, DIAMOND }
+
 #[derive(Clone, PartialEq)]
 struct Card {
     color: Color,
     quantity: Quantity,
     shading: Shading,
+    shape: Shape,
+}
+
+impl Card {
+    fn print(&self) {
+        println!("{} {} !", "it".red(), "works".purple().bold());
+
+    }
 }
 
 impl fmt::Debug for Card {
@@ -65,7 +78,8 @@ fn main() {
 
 fn print_board(board: &Vec<Card>) {
     for (index, card) in board.iter().enumerate() {
-        print!("{}:{:?}\t\t", index, card);
+        print!("{}:", index);
+        card.print();
         if (index + 1) % 3 == 0 {
             print!("\n");
         }
@@ -120,6 +134,12 @@ fn is_set(card_0: &Card, card_1: &Card, card_2: &Card) -> bool {
         return false;
     }
 
+    if !((card_0.shape == card_1.shape && card_0.shape == card_2.shape) ||
+        (card_0.shape != card_1.shape && card_0.shape != card_2.shape && card_1.shape != card_2.shape)) {
+        println!("Shading check failed");
+        return false;
+    }
+
     return true;
 }
 
@@ -128,12 +148,15 @@ fn initial_deck() -> Vec<Card> {
     for color in [RED, GREEN, PURPLE].iter() {
         for quantity in [ONE, TWO, THREE].iter() {
             for shading in [EMPTY, PARTIAL, FULL].iter() {
-                let card = Card {
-                    color: color.clone(),
-                    quantity: quantity.clone(),
-                    shading: shading.clone(),
-                };
-                pile.push(card);
+                for shape in [SQUIGGLE, CIRCLE, DIAMOND].iter() {
+                    let card = Card {
+                        color: color.clone(),
+                        quantity: quantity.clone(),
+                        shading: shading.clone(),
+                        shape: shape.clone(),
+                    };
+                    pile.push(card);
+                }
             }
         }
     }
@@ -164,16 +187,19 @@ mod tests {
             color: RED,
             quantity: ONE,
             shading: EMPTY,
+            shape: SQUIGGLE,
         };
         let card_1 = Card {
             color: RED,
             quantity: ONE,
             shading: PARTIAL,
+            shape: SQUIGGLE,
         };
         let card_2 = Card {
             color: RED,
             quantity: ONE,
             shading: FULL,
+            shape: SQUIGGLE,
         };
 
         assert_eq!(is_set(&card_0, &card_1, &card_2), true)
@@ -185,16 +211,19 @@ mod tests {
             color: RED,
             quantity: ONE,
             shading: EMPTY,
+            shape: SQUIGGLE,
         };
         let card_1 = Card {
             color: RED,
             quantity: TWO,
             shading: PARTIAL,
+            shape: SQUIGGLE,
         };
         let card_2 = Card {
             color: RED,
             quantity: THREE,
             shading: FULL,
+            shape: SQUIGGLE,
         };
 
         assert_eq!(is_set(&card_0, &card_1, &card_2), true)
@@ -206,16 +235,19 @@ mod tests {
             color: RED,
             quantity: ONE,
             shading: EMPTY,
+            shape: SQUIGGLE,
         };
         let card_1 = Card {
             color: GREEN,
             quantity: TWO,
             shading: PARTIAL,
+            shape: SQUIGGLE,
         };
         let card_2 = Card {
             color: PURPLE,
             quantity: THREE,
             shading: FULL,
+            shape: SQUIGGLE,
         };
 
         assert_eq!(is_set(&card_0, &card_1, &card_2), true)
@@ -227,16 +259,19 @@ mod tests {
             color: PURPLE,
             quantity: TWO,
             shading: FULL,
+            shape: SQUIGGLE,
         };
         let card_1 = Card {
             color: RED,
             quantity: THREE,
             shading: PARTIAL,
+            shape: SQUIGGLE,
         };
         let card_2 = Card {
             color: RED,
             quantity: THREE,
             shading: EMPTY,
+            shape: SQUIGGLE,
         };
 
         assert_eq!(is_set(&card_0, &card_1, &card_2), false)
