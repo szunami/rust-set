@@ -136,7 +136,7 @@ fn is_set(card_0: &Card, card_1: &Card, card_2: &Card) -> bool {
 
     if !((card_0.shape == card_1.shape && card_0.shape == card_2.shape) ||
         (card_0.shape != card_1.shape && card_0.shape != card_2.shape && card_1.shape != card_2.shape)) {
-        println!("Shading check failed");
+        println!("Shape check failed");
         return false;
     }
 
