@@ -29,8 +29,25 @@ struct Card {
 
 impl Card {
     fn print(&self) {
-        println!("{} {} !", "it".red(), "works".purple().bold());
+        let shape = match self.shape {
+            SQUIGGLE => "S",
+            CIRCLE => "O",
+            DIAMOND => "<>",
+        };
 
+        let repeated_shape = match self.quantity {
+            ONE => String::from(shape),
+            TWO => shape.repeat(2),
+            THREE => shape.repeat(3)
+        };
+
+        let colored_repeated_shape = match self.color {
+            RED => repeated_shape.red(),
+            GREEN => repeated_shape.green(),
+            PURPLE => repeated_shape.purple(),
+        };
+
+        print!("{}", colored_repeated_shape)
     }
 }
 
