@@ -1,4 +1,3 @@
-
 #[macro_use]
 extern crate log;
 extern crate env_logger;
@@ -11,6 +10,8 @@ use rand::Rng;
 use std::io;
 use colored::*;
 use crate::Shape::{DIAMOND, SQUIGGLE, CIRCLE};
+use std::num::ParseIntError;
+use std::error::Error;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 enum Color { RED, GREEN, PURPLE }
@@ -91,40 +92,45 @@ fn main() {
         println!("Enter help, deal, or input a set.");
 
         match read_input() {
-            InputType::Deal => {
-                if !find_set(&board).is_empty() {
-                    println!("There is a set here. Type help if you need help.");
-                } else {
-                    println!("There are no sets. Dealing 3 more cards.");
-                    board.push(pile.pop().unwrap());
-                    board.push(pile.pop().unwrap());
-                    board.push(pile.pop().unwrap());
-                }
-            }
-            InputType::Help => {
-                let valid_sets = find_set(&board);
-                if valid_sets.is_empty() {
-                    println!("There are no sets here. Type deal.");
-                    return;
-                }
-                println!("{:?}", valid_sets.get(0).unwrap());
-            }
-            InputType::PotentialSet(card_index_0, card_index_1, card_index_2) => {
-                let card_0: &Card = board.get(card_index_0).unwrap();
-                let card_1: &Card = board.get(card_index_1).unwrap();
-                let card_2: &Card = board.get(card_index_2).unwrap();
+            Err(e) => println!("{}", e.details),
+            Ok(input) => {
+                match input {
+                    InputType::Deal => {
+                        if !find_set(&board).is_empty() {
+                            println!("There is a set here. Type help if you need help.");
+                        } else {
+                            println!("There are no sets. Dealing 3 more cards.");
+                            board.push(pile.pop().unwrap());
+                            board.push(pile.pop().unwrap());
+                            board.push(pile.pop().unwrap());
+                        }
+                    }
+                    InputType::Help => {
+                        let valid_sets = find_set(&board);
+                        if valid_sets.is_empty() {
+                            println!("There are no sets here. Type deal.");
+                            return;
+                        }
+                        println!("{:?}", valid_sets.get(0).unwrap());
+                    }
+                    InputType::PotentialSet(card_index_0, card_index_1, card_index_2) => {
+                        let card_0: &Card = board.get(card_index_0).unwrap();
+                        let card_1: &Card = board.get(card_index_1).unwrap();
+                        let card_2: &Card = board.get(card_index_2).unwrap();
 
-                println!("You chose {:?}, {:?}, {:?}", card_0, card_1, card_2);
+                        println!("You chose {:?}, {:?}, {:?}", card_0, card_1, card_2);
 
-                if is_set(card_0, card_1, card_2) {
-                    let mut indices = vec![card_index_0, card_index_1, card_index_2];
-                    indices.sort();
-                    println!("Nicely done!");
-                    board.remove(indices[2]);
-                    board.remove(indices[1]);
-                    board.remove(indices[0]);
-                } else {
-                    println!("Keep looking!")
+                        if is_set(card_0, card_1, card_2) {
+                            let mut indices = vec![card_index_0, card_index_1, card_index_2];
+                            indices.sort();
+                            println!("Nicely done!");
+                            board.remove(indices[2]);
+                            board.remove(indices[1]);
+                            board.remove(indices[0]);
+                        } else {
+                            println!("Keep looking!")
+                        }
+                    }
                 }
             }
         };
@@ -133,7 +139,7 @@ fn main() {
 
 fn find_set(board: &Vec<Card>) -> Vec<(usize, usize, usize)> {
     let mut result = Vec::new();
-    for index_0  in 0..board.len() {
+    for index_0 in 0..board.len() {
         for index_1 in (index_0 + 1)..board.len() {
             for index_2 in (index_1 + 1)..board.len() {
                 let card_0: &Card = board.get(index_0).unwrap();
@@ -159,7 +165,30 @@ fn print_board(board: &Vec<Card>) {
     }
 }
 
-fn read_input() -> InputType {
+#[derive(Debug)]
+struct MyError {
+    details: String
+}
+
+impl MyError {
+    fn new(msg: &str) -> MyError {
+        MyError { details: msg.to_string() }
+    }
+}
+
+impl fmt::Display for MyError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.details)
+    }
+}
+
+impl Error for MyError {
+    fn description(&self) -> &str {
+        &self.details
+    }
+}
+
+fn read_input() -> Result<InputType, MyError> {
     let mut raw_user_input = String::new();
 
     io::stdin()
@@ -167,31 +196,37 @@ fn read_input() -> InputType {
         .expect("Failed to read line");
 
     if raw_user_input.trim() == "deal" {
-        return InputType::Deal;
+        return Ok(InputType::Deal);
     }
 
     if raw_user_input.trim() == "help" {
-        return InputType::Help;
+        return Ok(InputType::Help);
     }
 
     let potential_set_indices: Vec<&str> = raw_user_input.split(" ").collect::<Vec<&str>>();
     if potential_set_indices.len() != 3 {
-        println!("Failed to read line");
+        return Err(MyError::new(format!("Expected 3 arguments, found {}.", potential_set_indices.len()).as_str()));
     }
 
-    let card_index_0 = parse_card_index(&potential_set_indices, 0) as usize;
-    let card_index_1 = parse_card_index(&potential_set_indices, 1) as usize;
-    let card_index_2 = parse_card_index(&potential_set_indices, 2) as usize;
+    let card_index_0 = match parse_card_index(&potential_set_indices, 0) {
+        Ok(num) => num,
+        Err(_str) => return Err(MyError::new("Argument 0 must be an integer."))
+    } as usize;
+    let card_index_1 = match parse_card_index(&potential_set_indices, 1) {
+        Ok(num) => num,
+        Err(_str) => return Err(MyError::new("Argument 1 must be an integer."))
+    } as usize;
+    let card_index_2 = match parse_card_index(&potential_set_indices, 2) {
+        Ok(num) => num,
+        Err(_str) => return Err(MyError::new("Argument 2 must be an integer."))
+    } as usize;
 
-    return InputType::PotentialSet(card_index_0, card_index_1, card_index_2);
+    return Ok(InputType::PotentialSet(card_index_0, card_index_1, card_index_2));
 }
 
-fn parse_card_index(potential_set_indices: &Vec<&str>, input_index: usize) -> i32 {
-    let card_index: &str = match potential_set_indices.get(input_index) {
-        Some(num) => *num,
-        _ => panic!("asdf")
-    };
-    return card_index.trim().parse::<i32>().unwrap();
+fn parse_card_index(potential_set_indices: &Vec<&str>, input_index: usize) -> Result<i32, ParseIntError> {
+    let card_index: &str = potential_set_indices.get(input_index).unwrap();
+    return card_index.trim().parse::<i32>();
 }
 
 fn is_set(card_0: &Card, card_1: &Card, card_2: &Card) -> bool {
