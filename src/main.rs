@@ -28,7 +28,7 @@ struct Card {
 }
 
 impl Card {
-    fn print(&self) {
+    fn print(&self) -> ColoredString {
         let shape = match self.shape {
             SQUIGGLE => "S",
             CIRCLE => "O",
@@ -41,13 +41,19 @@ impl Card {
             THREE => shape.repeat(3)
         };
 
-        let colored_repeated_shape = match self.color {
+        let colored_repeated_shape: ColoredString = match self.color {
             RED => repeated_shape.red(),
             GREEN => repeated_shape.green(),
             PURPLE => repeated_shape.purple(),
         };
 
-        print!("{}", colored_repeated_shape)
+        let shaded_colored_repeated_shape = match self.shading {
+            EMPTY => colored_repeated_shape.dimmed(),
+            PARTIAL => colored_repeated_shape,
+            FULL => colored_repeated_shape.bold(),
+        };
+
+        return shaded_colored_repeated_shape;
     }
 }
 
@@ -95,8 +101,8 @@ fn main() {
 
 fn print_board(board: &Vec<Card>) {
     for (index, card) in board.iter().enumerate() {
-        print!("{}:", index);
-        card.print();
+        print!("{:3}: [{:10}]", index, card.print());
+        print!("\t\t");
         if (index + 1) % 3 == 0 {
             print!("\n");
         }
