@@ -1,3 +1,8 @@
+
+#[macro_use]
+extern crate log;
+extern crate env_logger;
+
 use crate::Color::{GREEN, RED, PURPLE};
 use crate::Quantity::{ONE, TWO, THREE};
 use crate::Shading::{EMPTY, PARTIAL, FULL};
@@ -70,6 +75,7 @@ impl fmt::Debug for Card {
 }
 
 fn main() {
+    env_logger::init();
     let mut pile = shuffle(&initial_deck());
     let mut board = Vec::new();
 
@@ -90,7 +96,6 @@ fn main() {
                     println!("There is a set here. Type help if you need help.");
                 } else {
                     println!("There are no sets. Dealing 3 more cards.");
-                    println!("Dishing out 3 more cards");
                     board.push(pile.pop().unwrap());
                     board.push(pile.pop().unwrap());
                     board.push(pile.pop().unwrap());
@@ -190,29 +195,29 @@ fn parse_card_index(potential_set_indices: &Vec<&str>, input_index: usize) -> i3
 }
 
 fn is_set(card_0: &Card, card_1: &Card, card_2: &Card) -> bool {
-    println!("Checking if {:?}, {:?}, {:?} is a set...", card_0, card_1, card_2);
+    debug!("Checking if {:?}, {:?}, {:?} is a set...", card_0, card_1, card_2);
 
     if !((card_0.color == card_1.color && card_0.color == card_2.color) ||
         (card_0.color != card_1.color && card_0.color != card_2.color && card_1.color != card_2.color)) {
-        println!("Color check failed");
+        debug!("Color check failed");
         return false;
     }
 
     if !((card_0.quantity == card_1.quantity && card_0.quantity == card_2.quantity) ||
         (card_0.quantity != card_1.quantity && card_0.quantity != card_2.quantity && card_1.quantity != card_2.quantity)) {
-        println!("Quantity check failed");
+        debug!("Quantity check failed");
         return false;
     }
 
     if !((card_0.shading == card_1.shading && card_0.shading == card_2.shading) ||
         (card_0.shading != card_1.shading && card_0.shading != card_2.shading && card_1.shading != card_2.shading)) {
-        println!("Shading check failed");
+        debug!("Shading check failed");
         return false;
     }
 
     if !((card_0.shape == card_1.shape && card_0.shape == card_2.shape) ||
         (card_0.shape != card_1.shape && card_0.shape != card_2.shape && card_1.shape != card_2.shape)) {
-        println!("Shape check failed");
+        debug!("Shape check failed");
         return false;
     }
 
