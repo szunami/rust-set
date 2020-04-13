@@ -65,7 +65,7 @@ fn main() {
 
 fn print_board(board: &Vec<Card>) {
     for (index, card) in board.iter().enumerate() {
-        print!("{:?}\t\t", card);
+        print!("{}:{:?}\t\t", index, card);
         if (index + 1) % 3 == 0 {
             print!("\n");
         }
