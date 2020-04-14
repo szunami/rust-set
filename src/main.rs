@@ -3,11 +3,14 @@ extern crate log;
 extern crate env_logger;
 
 mod set;
+mod game;
+mod input;
 
 use core::fmt;
 use std::io;
 use std::error::Error;
 use std::num::ParseIntError;
+use crate::set::find_set;
 
 enum InputType {
     Deal,
@@ -19,87 +22,76 @@ enum InputType {
 
 fn main() {
     env_logger::init();
-    let mut pile = set::shuffle(&set::initial_deck());
-    let mut board = Vec::new();
 
-    while !pile.is_empty() {
-        while board.len() < 12 {
-            println!("Dishing out 3 more cards");
-            board.push(pile.pop().unwrap());
-            board.push(pile.pop().unwrap());
-            board.push(pile.pop().unwrap());
-        }
-        println!("Current board state");
-        print_board(&board);
-        println!("Enter help, deal, input a set, or exit.");
+    let move_provider = input::DummyInputProvider{};
+    let mut game = game::Game::initialize(move_provider);
+    game.begin_playing();
 
-        match read_input() {
-            Err(e) => println!("{}", e.details),
-            Ok(input) => {
-                match input {
-                    InputType::Exit => {
-                        println!("Goodbye for now.");
-                        return;
-                    }
-                    InputType::Deal => {
-                        if !find_set(&board).is_empty() {
-                            println!("There is a set here. Type help if you need help.");
-                        } else {
-                            println!("There are no sets. Dealing 3 more cards.");
-                            board.push(pile.pop().unwrap());
-                            board.push(pile.pop().unwrap());
-                            board.push(pile.pop().unwrap());
-                        }
-                    }
-                    InputType::Help => {
-                        let valid_sets = find_set(&board);
-                        if valid_sets.is_empty() {
-                            println!("There are no sets here. Type deal.");
-                            return;
-                        }
-                        println!("{:?}", valid_sets.get(0).unwrap());
-                    }
-                    InputType::PotentialSet(card_index_0, card_index_1, card_index_2) => {
-                        let card_0: &set::Card = board.get(card_index_0).unwrap();
-                        let card_1: &set::Card = board.get(card_index_1).unwrap();
-                        let card_2: &set::Card = board.get(card_index_2).unwrap();
-
-                        println!("You chose {:?}, {:?}, {:?}", card_0, card_1, card_2);
-
-                        if set::is_set(card_0, card_1, card_2) {
-                            let mut indices = vec![card_index_0, card_index_1, card_index_2];
-                            indices.sort();
-                            println!("Nicely done!");
-                            board.remove(indices[2]);
-                            board.remove(indices[1]);
-                            board.remove(indices[0]);
-                        } else {
-                            println!("Keep looking!")
-                        }
-                    }
-                }
-            }
-        };
-    }
+//    let mut pile = set::shuffle(&set::initial_deck());
+//    let mut board = Vec::new();
+//
+//    while !pile.is_empty() {
+//        while board.len() < 12 {
+//            println!("Dishing out 3 more cards");
+//            board.push(pile.pop().unwrap());
+//            board.push(pile.pop().unwrap());
+//            board.push(pile.pop().unwrap());
+//        }
+//        println!("Current board state");
+//        print_board(&board);
+//        println!("Enter help, deal, input a set, or exit.");
+//
+//        match read_input() {
+//            Err(e) => println!("{}", e.details),
+//            Ok(input) => {
+//                match input {
+//                    InputType::Exit => {
+//                        println!("Goodbye for now.");
+//                        return;
+//                    }
+//                    InputType::Deal => {
+//                        if !set::find_set(&board).is_empty() {
+//                            println!("There is a set here. Type help if you need help.");
+//                        } else {
+//                            println!("There are no sets. Dealing 3 more cards.");
+//                            board.push(pile.pop().unwrap());
+//                            board.push(pile.pop().unwrap());
+//                            board.push(pile.pop().unwrap());
+//                        }
+//                    }
+//                    InputType::Help => {
+//                        let valid_sets = find_set(&board);
+//                        if valid_sets.is_empty() {
+//                            println!("There are no sets here. Type deal.");
+//                            return;
+//                        }
+//                        println!("{:?}", valid_sets.get(0).unwrap());
+//                    }
+//                    InputType::PotentialSet(card_index_0, card_index_1, card_index_2) => {
+//                        let card_0: &set::Card = board.get(card_index_0).unwrap();
+//                        let card_1: &set::Card = board.get(card_index_1).unwrap();
+//                        let card_2: &set::Card = board.get(card_index_2).unwrap();
+//
+//                        println!("You chose {:?}, {:?}, {:?}", card_0, card_1, card_2);
+//
+//                        if set::is_set(card_0, card_1, card_2) {
+//                            let mut indices = vec![card_index_0, card_index_1, card_index_2];
+//                            indices.sort();
+//                            println!("Nicely done!");
+//                            board.remove(indices[2]);
+//                            board.remove(indices[1]);
+//                            board.remove(indices[0]);
+//                        } else {
+//                            println!("Keep looking!")
+//                        }
+//                    }
+//                }
+//            }
+//        };
+//    }
 }
 
-fn find_set(board: &Vec<set::Card>) -> Vec<(usize, usize, usize)> {
-    let mut result = Vec::new();
-    for index_0 in 0..board.len() {
-        for index_1 in (index_0 + 1)..board.len() {
-            for index_2 in (index_1 + 1)..board.len() {
-                let card_0: &set::Card = board.get(index_0).unwrap();
-                let card_1: &set::Card = board.get(index_1).unwrap();
-                let card_2: &set::Card = board.get(index_2).unwrap();
 
-                if set::is_set(card_0, card_1, card_2) {
-                    result.push((index_0, index_1, index_2));
-                }
-            }
-        }
-    }
-    return result;
-}
 
 fn print_board(board: &Vec<set::Card>) {
     for (index, card) in board.iter().enumerate() {

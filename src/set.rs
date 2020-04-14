@@ -26,6 +26,23 @@ pub(crate) struct Card {
     shape: Shape,
 }
 
+pub(crate) fn find_set(board: &Vec<Card>) -> Vec<(usize, usize, usize)> {
+    let mut result = Vec::new();
+    for index_0 in 0..board.len() {
+        for index_1 in (index_0 + 1)..board.len() {
+            for index_2 in (index_1 + 1)..board.len() {
+                let card_0: &Card = board.get(index_0).unwrap();
+                let card_1: &Card = board.get(index_1).unwrap();
+                let card_2: &Card = board.get(index_2).unwrap();
+
+                if is_set(card_0, card_1, card_2) {
+                    result.push((index_0, index_1, index_2));
+                }
+            }
+        }
+    }
+    return result;
+}
 
 impl Card {
     pub(crate) fn print(&self) -> ColoredString {
