@@ -1,4 +1,3 @@
-use std::fmt::Write;
 use colored::{ColoredString, Colorize};
 use crate::fmt;
 use crate::set::Color::{RED, GREEN, PURPLE};

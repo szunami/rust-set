@@ -5,11 +5,9 @@ extern crate env_logger;
 mod set;
 
 use core::fmt;
-use rand::Rng;
 use std::io;
-use colored::*;
-use std::num::ParseIntError;
 use std::error::Error;
+use std::num::ParseIntError;
 
 enum InputType {
     Deal,
