@@ -12,7 +12,7 @@ impl DummyInputProvider {
         return Move::IdentifySet(0, 1, 2);
     }
 
-    pub(crate) fn deny_move() {
+    pub(crate) fn deny_move() {}
 
-    }
+    pub fn give_move(given_move: &(usize, usize, usize)) {}
 }
