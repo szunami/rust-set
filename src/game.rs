@@ -5,19 +5,17 @@ use crate::input::{Move, DummyInputProvider};
 pub(crate) struct Game {
     pile: Vec<set::Card>,
     pub(crate) board: Vec<set::Card>,
-    move_provider: input::DummyInputProvider,
 }
 
 
 impl Game {
-    pub fn initialize(move_provider: input::DummyInputProvider) -> Game {
-        let mut pile = set::shuffle(&set::initial_deck());
-        let mut board = Vec::new();
+    pub fn initialize() -> Game {
+        let pile = set::shuffle(&set::initial_deck());
+        let board = Vec::new();
 
         return Game {
             pile,
             board,
-            move_provider,
         };
     }
 

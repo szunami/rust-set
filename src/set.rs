@@ -1,5 +1,4 @@
 use colored::{ColoredString, Colorize};
-use crate::fmt;
 use crate::set::Color::{RED, GREEN, PURPLE};
 use crate::set::Quantity::{ONE, TWO, THREE};
 use crate::set::Shading::{PARTIAL, EMPTY, FULL};
