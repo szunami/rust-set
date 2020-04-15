@@ -4,7 +4,7 @@ use crate::input::{Move, DummyInputProvider};
 
 pub(crate) struct Game {
     pile: Vec<set::Card>,
-    board: Vec<set::Card>,
+    pub(crate) board: Vec<set::Card>,
     move_provider: input::DummyInputProvider,
 }
 
@@ -28,7 +28,7 @@ impl Game {
             }
         }
 
-        match input::DummyInputProvider::get_move() {
+        match input::DummyInputProvider::get_move(&self) {
             Move::IdentifySet(index_0, index_1, index_2) => {
                 let card_0: &set::Card = self.board.get(index_0).unwrap();
                 let card_1: &set::Card = self.board.get(index_1).unwrap();
