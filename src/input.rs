@@ -1,6 +1,6 @@
 use crate::game::Game;
 use std::io;
-use crate::{set};
+use crate::set;
 use std::num::ParseIntError;
 
 pub enum Move {
@@ -14,6 +14,7 @@ pub struct DummyInputProvider {}
 
 impl DummyInputProvider {
     pub(crate) fn get_move(game: &Game) -> Move {
+        debug!("Getting move from user...");
         println!("Current board state");
         print_board(&game.board);
         println!("Enter help, deal, input a set, or exit.");
@@ -23,19 +24,21 @@ impl DummyInputProvider {
                 println!("{}", e.details);
                 return DummyInputProvider::get_move(game);
             }
-
-            Ok(input) => {
-                return Move::IdentifySet(0, 1, 2);
-            }
+            Ok(input) => input
         }
     }
 
     pub
     (crate) fn
-    deny_move() {}
+    deny_move() {
+        println!("There is a valid set. Keep looking!");
+    }
 
     pub fn
-    give_move(given_move: &(usize, usize, usize)) {}
+    give_move(given_move: &(usize, usize, usize)) {
+        let (index_0, index_1, index_2) = given_move;
+        println!("Did you think about {}, {}, {}?", index_0, index_1, index_2);
+    }
 }
 
 

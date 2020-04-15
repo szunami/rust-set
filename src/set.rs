@@ -76,7 +76,7 @@ impl Card {
 }
 
 pub(crate) fn is_set(card_0: &Card, card_1: &Card, card_2: &Card) -> bool {
-    debug!("Checking if {:?}, {:?}, {:?} is a set...", card_0.print(), card_1.print(), card_2.print());
+    debug!("Checking if {:}, {:}, {:} is a set...", card_0.print(), card_1.print(), card_2.print());
 
     if !((card_0.color == card_1.color && card_0.color == card_2.color) ||
         (card_0.color != card_1.color && card_0.color != card_2.color && card_1.color != card_2.color)) {
