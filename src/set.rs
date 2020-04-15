@@ -27,6 +27,7 @@ pub(crate) struct Card {
 }
 
 pub(crate) fn find_set(board: &Vec<Card>) -> Vec<(usize, usize, usize)> {
+    debug!("Finding sets...");
     let mut result = Vec::new();
     for index_0 in 0..board.len() {
         for index_1 in (index_0 + 1)..board.len() {
@@ -75,7 +76,7 @@ impl Card {
 }
 
 pub(crate) fn is_set(card_0: &Card, card_1: &Card, card_2: &Card) -> bool {
-    debug!("Checking if {:?}, {:?}, {:?} is a set...", card_0, card_1, card_2);
+    debug!("Checking if {:?}, {:?}, {:?} is a set...", card_0.print(), card_1.print(), card_2.print());
 
     if !((card_0.color == card_1.color && card_0.color == card_2.color) ||
         (card_0.color != card_1.color && card_0.color != card_2.color && card_1.color != card_2.color)) {
@@ -102,13 +103,6 @@ pub(crate) fn is_set(card_0: &Card, card_1: &Card, card_2: &Card) -> bool {
     }
 
     return true;
-}
-
-
-impl fmt::Debug for Card {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(format!("{{{:?}, {:?}, {:?}}}", &self.color, &self.quantity, &self.shading).as_str())
-    }
 }
 
 pub(crate) fn initial_deck() -> Vec<Card> {
