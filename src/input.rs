@@ -3,6 +3,7 @@ use std::io;
 use crate::set;
 use std::num::ParseIntError;
 
+#[derive(PartialEq, std::fmt::Debug)]
 pub enum Move {
     RequestDeal,
     RequestHelp,
@@ -70,6 +71,10 @@ fn read_input() -> Result<Move, MyError> {
         .read_line(&mut raw_user_input)
         .expect("Failed to read line");
 
+    return parse_user_input(&raw_user_input);
+}
+
+fn parse_user_input(raw_user_input: &str) -> Result<Move, MyError> {
     if raw_user_input.trim() == "deal" {
         return Ok(Move::RequestDeal);
     }
@@ -107,4 +112,39 @@ fn read_input() -> Result<Move, MyError> {
 fn parse_card_index(potential_set_indices: &Vec<&str>, input_index: usize) -> Result<i32, ParseIntError> {
     let card_index: &str = potential_set_indices.get(input_index).unwrap();
     return card_index.trim().parse::<i32>();
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parse_user_input_deal() {
+        assert_eq!(parse_user_input("deal\n").unwrap(), Move::RequestDeal);
+    }
+
+    #[test]
+    fn parse_user_input_help() {
+        assert_eq!(parse_user_input("help\n").unwrap(), Move::RequestHelp);
+    }
+
+    #[test]
+    fn parse_user_input_exit() {
+        assert_eq!(parse_user_input("exit\n").unwrap(), Move::RequestExit);
+    }
+
+    #[test]
+    fn parse_user_input_potential_set() {
+        assert_eq!(parse_user_input("0 1 2\n").unwrap(), Move::IdentifySet(0, 1, 2))
+    }
+
+    #[test]
+    fn parse_user_input_potential_gibberish_returns_err() {
+        assert!(parse_user_input("asdf\n").is_err())
+    }
+    #[test]
+    fn parse_user_input_potential_structured_gibberish_returns_err() {
+        assert!(parse_user_input("0 1 qwer\n").is_err())
+    }
+
 }
