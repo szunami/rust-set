@@ -7,4 +7,4 @@ orbs:
 workflows:
   build:
     jobs:
-      - build
+      - test
